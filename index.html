@@ -1,106 +1,128 @@
-<!--
-  tiktok-link_clone.html
-  - 이 파일은 사용자가 보내준 https://ojonine.github.io/tiktok-link/ 페이지와 동일한 동작(비밀번호 입력 후 링크 열기 또는 숨겨진 콘텐츠 표시)을 하는 단일 HTML 파일 예시입니다.
-  - 사용 방법: 파일을 저장한 뒤 브라우저에서 열거나 GitHub Pages에 올려 호스팅할 수 있습니다.
-  - 수정 포인트: 아래 JS의 `PASSWORD` 변수만 원하는 비밀번호로 수정하세요.
--->
-
 <!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>비밀번호 / 링크열기</title>
+  <title>비밀번호</title>
   <style>
-    /* 전체 레이아웃 - 심플한 중앙 콘텐츠 */
-    :root{--bg:#0b1220;--card:#0f1724;--accent:#ff2d55;--muted:#9aa4b2}
-    html,body{height:100%;margin:0;font-family:Inter, "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;background:linear-gradient(180deg,#07102a 0%, #071428 100%);color:#fff}
-    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
-    .card{width:100%;max-width:420px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:28px 22px;box-shadow:0 10px 30px rgba(2,6,23,.6);border:1px solid rgba(255,255,255,0.03)}
-    h1{margin:0 0 8px;font-size:20px;letter-spacing:-0.01em}
-    p.lead{margin:0 0 18px;color:var(--muted);font-size:13px}
-
-    .input-row{display:flex;gap:8px}
-    input[type="password"]{flex:1;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:inherit;font-size:14px;outline:none}
-    button.btn{padding:0 14px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
-    .info{margin-top:14px;font-size:13px;color:var(--muted)}
-
-    .hidden-content{margin-top:18px;padding:14px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.02)}
-    a.link-out{display:inline-block;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.03);text-decoration:none;color:#fff}
-
-    /* 간단한 반응형 */
-    @media (max-width:420px){.card{padding:20px}}
+    body{
+      margin:0;
+      height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:#000;
+      color:#fff;
+      font-family:Arial, sans-serif;
+      transition: opacity 0.6s ease; /* 화면 전체 페이드아웃 */
+    }
+    .box{
+      width:90%;
+      max-width:360px;
+      text-align:center;
+      transition: opacity 0.5s ease; /* 컨텐츠 페이드아웃 */
+    }
+    input{
+      width:100%;
+      padding:12px;
+      font-size:16px;
+      border-radius:8px;
+      border:1px solid #333;
+      background:#111;
+      color:white;
+      margin-top:10px;
+      outline:none;
+    }
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:10px;
+      font-size:16px;
+      border:0;
+      border-radius:8px;
+      background:#ff2d55;
+      color:white;
+      cursor:pointer;
+    }
+    #msg{
+      margin-top:10px;
+      color:#ff4d4d;
+      font-size:14px;
+      display:none;
+    }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card" role="main">
-      <h1>비밀번호 / 링크열기</h1>
-      <p class="lead">비밀번호를 입력하면 숨겨진 링크 또는 콘텐츠를 열 수 있습니다.</p>
-
-      <div class="input-row" aria-hidden="false">
-        <input id="pw" type="password" placeholder="비밀번호를 입력하세요" autocomplete="off">
-        <button id="openBtn" class="btn">링크열기</button>
-      </div>
-
-      <div class="info">※ 비밀번호가 맞으면 숨겨진 링크가 표시됩니다.</div>
-
-      <div id="result" class="hidden-content" style="display:none;">
-        <!-- 여기에 비밀번호가 맞았을 때 보여줄 콘텐츠를 넣으세요. -->
-        <p style="margin:0 0 8px">콘텐츠 접근 허용됨</p>
-        <a id="targetLink" class="link-out" href="#" target="_blank" rel="noopener">숨겨진 링크 열기</a>
-      </div>
-    </div>
+  <div class="box" id="contentBox">
+    <h2>비밀번호 입력</h2>
+    <input id="pw" type="password" placeholder="비밀번호">
+    <button onclick="openLink()">확인</button>
+    <div id="msg">비밀번호가 틀렸습니다.</div>
   </div>
 
-  <script>
-    // == 사용자 설정 ==
-    // PASSWORD 값을 원하는 비밀번호로 바꾸세요.
-    // 주의: 클라이언트 사이드 JS에 비밀번호를 두는 방식은 완전한 보안이 아닙니다.
-    // 진짜 보안이 필요하면 서버 측 인증 또는 토큰 방식으로 구현하세요.
-    const PASSWORD = '123456'; // <-- 여기를 원하는 비밀번호로 변경
+<script>
+  const PASSWORD = "123456"; 
+  const HIDDEN_URL = "https://lite.tiktok.com/t/ZSHvSghQQdupm-4ImRQ/";
 
-    // 비밀번호가 맞았을 때 열어줄 URL
-    const HIDDEN_URL = 'https://lite.tiktok.com/t/ZSHvSghQQdupm-4ImRQ/'; // <-- 원하는 링크로 변경
+  function openLink(){
+    const input = document.getElementById("pw");
+    const msg = document.getElementById("msg");
+    const box = document.getElementById("contentBox");
+    const value = input.value.trim();
 
-    // == 동작 코드 ==
-    const input = document.getElementById('pw');
-    const btn = document.getElementById('openBtn');
-    const result = document.getElementById('result');
-    const targetLink = document.getElementById('targetLink');
-
-    function openIfCorrect(){
-      const v = input.value.trim();
-      if(!v) { input.focus(); return; }
-      if(v === PASSWORD){
-        // 비밀번호 맞으면 숨겨진 링크 보여주지 않고 즉시 이동
-        window.location.href = HIDDEN_URL;
-      } else {
-        // 실패: 간단한 흔들림 애니메이션
-        shake(input);
-        input.value = '';
-        input.focus();
-      }
+    if(value !== PASSWORD){
+      msg.style.display = "block";
+      shake();
+      input.value = "";
+      input.focus();
+      return;
     }
 
-    btn.addEventListener('click', openIfCorrect);
-    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') openIfCorrect(); });
+    msg.style.display = "none";
 
-    function shake(el){
-      el.style.transition = 'transform 0.05s';
-      el.style.transform = 'translateX(-8px)';
-      setTimeout(()=>{ el.style.transform = 'translateX(8px)'; }, 50);
-      setTimeout(()=>{ el.style.transform = 'translateX(0)'; el.style.transition = ''; }, 120);
-    }
+    // -----------------------------
+    // 🔥 화면 사라지는 애니메이션
+    // -----------------------------
+    box.style.opacity = "0";           // 내용 사라짐
+    document.body.style.opacity = "0"; // 전체 화면 사라짐
 
-    // URL 파라미터로 비밀번호 자동입력/체크 기능 (선택적)
-    // 예: ?pw=1234
-    (function(){
-      try{
-        const p = new URLSearchParams(location.search).get('pw');
-        if(p){ input.value = p; /* 자동으로 시도하려면 아래 주석 해제 */ /* openIfCorrect(); */ }
-      }catch(e){}
-    })();
-  </script>
+    // 화면이 사라진 후 앱 실행 (0.5초 후)
+    setTimeout(() => {
+      launchApp();
+    }, 500);
+  }
+
+  function launchApp() {
+    // 1차: 앱 우선 replace
+    window.location.replace(HIDDEN_URL);
+
+    // 2차: 300ms 뒤 href
+    setTimeout(() => {
+      window.location.href = HIDDEN_URL;
+    }, 300);
+
+    // 3차: iframe 강제 딥링크 (앱 있을 때 매우 강함)
+    setTimeout(() => {
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = HIDDEN_URL;
+      document.body.appendChild(iframe);
+    }, 600);
+  }
+
+  function shake(){
+    const input = document.getElementById("pw");
+    input.style.transition = "transform 0.1s";
+    input.style.transform = "translateX(-10px)";
+    setTimeout(()=> input.style.transform = "translateX(10px)", 100);
+    setTimeout(()=> input.style.transform = "translateX(0)", 200);
+  }
+
+  document.getElementById("pw").addEventListener("keydown", e=>{
+    if(e.key === "Enter") openLink();
+  });
+</script>
+
 </body>
 </html>

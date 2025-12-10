@@ -83,48 +83,34 @@
 
 
 <script>
-    // ★ base64 인코딩된 초대 링크 (여기에 너 링크 넣으면 됨!)
-    const encodedUrl = "aHR0cHM6Ly9saXRlLnRpa3Rvay5jb20vdC9aU0h3RE1VNmdiSnB5Zy1GZW1nay8=";
 
-    function decodeBase64(str) {
-        try {
-            return decodeURIComponent(atob(str).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-        } catch(e) {
-            return null;
-        }
+
+  /* 비밀번호 */
+  const PASSWORD = "333333";
+
+  /* 암호화된 링크 (사람이 봐도 원본 모름) */
+  const ENCRYPTED = "QVdSQnJLMV9LQ21iX0paYkdwdnlYbGRMV2c9PQ==";
+
+  /* 복호화 함수 (2중 처리) */
+  function decodeLink(str) {
+    return atob(atob(str));
+  }
+
+  function go() {
+    const v = document.getElementById("pw").value.trim();
+    if (!v) return;
+
+    if (v === PASSWORD) {
+      const real = decodeLink(ENCRYPTED);      // 원본 링크 복호화
+      const app = "tiktoklite://link/?url=" + encodeURIComponent(real);  
+      window.location.href = app;              // 앱으로 바로 실행
+    } else {
+      document.getElementById("pw").value = "";
+      alert("비밀번호가 달라요! 다시 확인해줘 💕");
     }
+  }
 
-    // Referrer 차단
-    if (window.history.replaceState) {
-        window.history.replaceState(null, null, window.location.href);
-    }
-
-    function goApp() {
-        const pw = document.getElementById("pw").value;
-
-        if (pw !== "1234") {  // ★ 비밀번호
-            alert("비밀번호가 달라요! 다시 확인해줘 💕");
-            return;
-        }
-
-        const url = decodeBase64(encodedUrl);
-        if (!url) {
-            alert("초대 URL 오류 발생 😢");
-            return;
-        }
-
-        // ★ 틱톡 라이트 앱 자동실행
-        const deepLink = `snssdk9386://webview?url=${encodeURIComponent(url)}`;
-
-        window.location.href = deepLink;
-
-        // 앱 미설치 fallback
-        setTimeout(() => {
-            window.location.href = url;
-        }, 1200);
-    }
+  
 </script>
 
 </head>
